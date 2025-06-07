@@ -1,4 +1,4 @@
-name: CI: Merge dev → test
+name: CI_test
 
 on:
   push:
