@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm test
+
+  auto-merge:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+      - name: Checkout test branch
+        uses: actions/checkout@v4
+        with:
+          ref: test
+
+      - name: Merge dev into test
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git fetch origin dev
+          git merge origin/dev --no-edit
+          git push origin test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
